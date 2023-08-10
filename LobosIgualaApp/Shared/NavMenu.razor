@@ -1,0 +1,138 @@
+﻿<div class="top-row ps-3 navbar navbar-light bg-white">
+    <div class="container-fluid justify-content-center">
+        <a class="navbar-brand" href="">
+            <img src="lob.jpg" class="logo" />
+@*            <div>Lobos IGUALA</div>
+*@        </a>
+        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</div>
+
+<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+    <nav class="flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span aria-hidden="true"></span>  <Icon Name="IconName.Home" Margin="Margin.Is3.FromEnd" /> Inicio
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" @onclick="()=>expandSubMenu= !expandSubMenu">
+                <span aria-hidden="true"></span>
+                <Icon Name="IconName.Stream" Margin="Margin.Is3.FromEnd" />Administracion
+            </NavLink>
+            @if (expandSubMenu)
+            {
+
+                <ul class="nav flex-column">
+                    <li class="nav-item px-3">
+                        <NavLink class="nav-link" href="pagos/list">
+                            <span aria-hidden="true"></span>
+                            <Icon Name="IconName.Save" Margin="Margin.Is3.FromEnd" />
+                            Pagos
+                        </NavLink>
+
+                    </li>
+                    <li class="nav-item px-3">
+                        <NavLink class="nav-link" href="pagos/reportes">
+                            <span aria-hidden="true"></span>
+                            <Icon Name="IconName.UserCheck" Margin="Margin.Is3.FromEnd" />
+                            Reportes
+                        </NavLink>
+
+                    </li>
+
+                </ul>
+            }
+
+        </div>
+
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" @onclick="()=>expandSubMenu= !expandSubMenu">
+                <span  aria-hidden="true"></span>
+                <Icon Name="IconName.Laptop" Margin="Margin.Is3.FromEnd" />Sistema
+            </NavLink>
+            @if (expandSubMenu)
+            {
+
+                <ul class="nav flex-column">
+                    <li class="nav-item px-3">
+                        <NavLink class="nav-link" href="usuarios/list">
+                            <span aria-hidden="true"></span>
+                            <Icon Name="IconName.UserCheck" Margin="Margin.Is3.FromEnd" />
+                            Usuarios
+                        </NavLink>
+
+                    </li>
+                    <li class="nav-item px-3">
+                        <NavLink class="nav-link" href="alumnos/list">
+                            <span  aria-hidden="true"></span>
+                            <Icon Name="IconName.UserFriends" Margin="Margin.Is3.FromEnd" />
+                            Alumnos
+                        </NavLink>
+                        </li>
+                        <li class="nav-item px-3">
+
+                        <NavLink class="nav-link" href="entrenadores/list">
+                            <span  aria-hidden="true"></span>
+                            <Icon Name="IconName.User" Margin="Margin.Is3.FromEnd" />
+                            Entrenadores
+                        </NavLink>
+                        </li>
+                    
+                    <li class="nav-item px-3">
+                        <NavLink class="nav-link" href="categorias/list">
+                            <span  aria-hidden="true"></span>
+                            <Icon Name="IconName.ShieldAlt" Margin="Margin.Is3.FromEnd" />Categorias
+                            
+                        </NavLink>
+                        </li>
+                    <li class="nav-item px-3">
+                        <NavLink class="nav-link" href="horarios/list">
+                            <span  aria-hidden="true"></span>
+                            <Icon Name="IconName.CalendarCheck" Margin="Margin.Is3.FromEnd" />Horarios
+                        </NavLink>
+                    </li>
+
+                    <li class="nav-item px-3">
+                        <NavLink class="nav-link" href="roles/list">
+                            <span aria-hidden="true"></span>
+                            <Icon Name="IconName.AlignCenter" Margin="Margin.Is3.FromEnd" />Roles
+                        </NavLink>
+                    </li>
+
+                   
+
+                </ul>
+
+
+                
+              
+               
+               
+                
+
+            }
+        </div>
+
+        
+
+
+        
+       
+    </nav>
+</div>
+
+@code {
+    private bool collapseNavMenu = true;
+    private bool expandSubMenu; //ADD
+
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+}

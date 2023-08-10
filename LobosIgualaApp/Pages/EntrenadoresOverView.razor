@@ -1,0 +1,283 @@
+﻿@*@page "/employes/list"*@
+@page "/entrenadores/list/{PaginaActual:int?}"
+@using LobosIguala.Data;
+@using LobosIguala.Domain.Entities;
+@using LobosIgualaApp.Shared;
+@using Microsoft.EntityFrameworkCore;
+@inject SweetAlertService Swal
+@inject IJSRuntime JS
+
+<PageTitle>Entrenadores</PageTitle>
+<h5>Lista de Entrenadores</h5>
+
+<div class="row">
+    <div class="col-12 text-start mb-2">
+        <a class="btn btn-primary"
+           href="/entrenadores/add"
+           style="--bs-btn-padding-y: .25rem; --bs-btn-padding-x: .5rem; --bs-btn-font-size: .75rem;">
+            Agregar Nuevo
+        </a>
+    </div>
+</div>
+
+@*<a class="btn btn-danger"
+   href="/alumnos/add"
+   style="--bs-btn-padding-y: .25rem; --bs-btn-padding-x: .5rem; --bs-btn-font-size: .75rem;">
+    <strong>Nuevo</strong>
+</a>
+
+*@
+
+
+
+@if (Entrenadores == null)
+{
+    <div>
+        Cargando informacion
+    </div>
+}
+else
+{
+
+
+
+    <ul class="pagination m-3">
+        <li class="page-item @(PaginaActual == 1 ? "disabled": " ")">
+            <a class="page-link" href="entrenadores/list/@(PaginaActual -1)">&laquo;</a>
+
+        </li>
+
+
+        @for (int i = 1; i <= TotalPaginas; i++)
+        {
+
+            <li class="page-item @(PaginaActual == i ? "active": " ")">
+                <a class="page-link" href="entrenadores/list/@i">@i</a>
+
+            </li>
+
+
+        }
+        <li class="page-item @(PaginaActual == TotalPaginas ? "disabled": " ")">
+            <a class="page-link" href="entrenadores/list/@(PaginaActual +1)">&raquo;</a>
+
+        </li>
+
+
+    </ul>
+
+    <div class="card shadow">
+        <div class="card-body">
+            @* <div class="row">
+        <div class="col-12 text-end mb-2">
+        <a class="btn btn-secondary"
+        href="/alumnos/add"
+        style="--bs-btn-padding-y: .25rem; --bs-btn-padding-x: .5rem; --bs-btn-font-size: .75rem;">
+        Agregar Alumno
+        </a>
+        </div>
+
+        </div>*@
+
+            <div class="row">
+                <div class="col-12">
+                    <table class="table align-middle mb-0 bg-white">
+
+
+                        <thead class="bg-danger" style="color:#ffffff" ;>
+
+                            <tr>
+
+
+                                <th>Nombre completo</th>
+                                <th>Telefono</th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+
+
+
+                        <tbody>
+                            @foreach (var entrenador in Entrenadores)
+                            {
+                                <tr>
+                                    <td>@entrenador.Nombre @entrenador.Apellidos</td>
+                                    <td>@entrenador.Telefono</td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+
+
+                                    <td class="btn-group-sm">
+                                        <a href="/entrenadores/edit/@entrenador.Id" class="btn btn-outline-primary">Editar</a>
+                                        <button class="btn btn-outline-danger" @onclick="() => HandleDelete(entrenador)">Eliminar</button>
+                                    </td>
+
+                                </tr>
+
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+
+    </div>
+
+}
+
+
+
+
+@code {
+
+    public List<Entrenador>? Entrenadores { get; set; }
+    [Parameter]
+    public int? PaginaActual { get; set; }
+
+    [Inject]
+    public IDbContextFactory<LobosIgualaDbContext>? ContextFactory { get; set; }
+    [Inject]
+    public NavigationManager? NavigationManager { get; set; }
+    [Inject]
+    public StateContainer? stateContainer { get; set; }
+    private const int itemporpagina = 4;
+    public int TotalPaginas { get; set; }
+
+
+
+    //protected override async Task OnInitializedAsync()
+
+    //El onparameter es para refrescar automaticamente
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadData();
+
+    }
+    private async Task HandleDelete(Entrenador entrenador)
+    {
+
+        //var isok = await JS.InvokeAsync<bool>("confirm", $"Deseas eliminar al usuario seleccionado?");
+
+
+
+
+
+
+
+
+
+
+
+        var resultado = await Swal.FireAsync(new SweetAlertOptions
+            {
+                Title = "Confirmación",
+                Text = "Deseas eliminar el entrenador seleccionado?",
+                Icon = SweetAlertIcon.Question,
+                ShowCancelButton = true,
+                ConfirmButtonText = "Si, eliminar",
+                CancelButtonText = "No, espera",
+                ConfirmButtonColor = "#1669c9",
+                CancelButtonColor = "#dc3545"
+            });
+
+        var isok = !string.IsNullOrEmpty(resultado.Value);
+
+        if (isok)
+        {
+
+            try
+            {
+                using var Db = ContextFactory?.CreateDbContext();
+                Db.Entrenadores.Remove(entrenador);
+                await Db.SaveChangesAsync();
+
+            }
+
+            catch (DbUpdateConcurrencyException)
+            {
+
+
+            }
+
+            await LoadData();
+        }
+
+
+    }
+
+    private async Task LoadData()
+    {
+        int itemsporsaltar = 0;
+
+        if (PaginaActual is null or < 1)
+        {
+            PaginaActual = 1;
+        }
+        else
+        {
+
+            //se multiplica para saltar los registros
+            itemsporsaltar = (PaginaActual.Value - 1) * itemporpagina;
+
+
+        }
+
+        using var Db = ContextFactory?.CreateDbContext();
+        var totalEntrenadores = Db.Entrenadores.Count();
+        TotalPaginas = totalEntrenadores == 0 ? 1 : (int)Math.Ceiling((double)totalEntrenadores / itemporpagina);
+
+
+
+
+        if (PaginaActual > TotalPaginas)
+        {
+            NavigationManager?.NavigateTo($"entrenadores/list/{TotalPaginas}");
+        }
+
+        stateContainer.SistemaOverViewPage = PaginaActual.Value;
+        this.Entrenadores = await Db.Entrenadores
+        .Skip(itemsporsaltar)
+        .Take(itemporpagina)
+        .ToListAsync();
+
+
+
+    }
+
+
+
+
+
+
+}

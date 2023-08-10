@@ -1,0 +1,142 @@
+﻿@page "/categorias/edit/{CategoriaId:int}"
+@using LobosIguala.Data;
+@using LobosIguala.Domain.Entities;
+@using Microsoft.EntityFrameworkCore;
+@inject SweetAlertService Swal
+
+<PageTitle>Editar Categoria</PageTitle>
+<h5>Editar Categoria</h5>
+
+
+@if (this.Categoria is null && !EstaOcupado)
+
+{
+    <div class="alert alert-danger">
+        La Categotria con el Id @this.CategoriaId no existe en la DataBase
+    </div>
+
+}
+else
+{
+
+
+
+    <CategoriasForm Categoria="@this.Categoria"
+             Horarios="@this.Horarios"
+                Entrenadores="@this.Entrenadores"
+                EstaOcupado="@this.EstaOcupado"
+             IsEdit="true"
+             OnSubmit="HandleSubmit"
+             OnCancel="NavegarAOverView" />
+
+
+
+}
+
+@if (MessageError is not null)
+{
+    <b />
+    <div class="alert alert-danger">
+        @this.MessageError
+    </div>
+
+
+}
+
+
+@code {
+    [Parameter]
+    public int CategoriaId { get; set; }
+    private Categoria? Categoria { get; set; } = new();
+    private bool EstaOcupado { get; set; }
+
+
+    public List<Entrenador>? Entrenadores { get; set; }
+    public List<Horario>? Horarios { get; set; }
+
+
+    public bool IsEdit { get; set; }
+    [Inject]
+
+    public IDbContextFactory<LobosIgualaDbContext> ContextFactory { get; set; }
+    [Inject]
+    public NavigationManager? NavigationManager { get; set; }
+
+    [Inject]
+    public StateContainer? stateContainer { get; set; }
+    public string? MessageError { get; set; }
+
+
+    protected override async Task OnParametersSetAsync()
+    {
+        EstaOcupado = true;
+        try
+        {
+            using var db = ContextFactory.CreateDbContext();
+            this.Categoria = await db.Categorias.AsNoTracking()
+            .FirstOrDefaultAsync(emp => emp.Id.Equals(this.CategoriaId));
+            this.Entrenadores = await db.Entrenadores.AsNoTracking().OrderBy(d => d.Nombre).ToListAsync();
+            this.Horarios = await db.Horarios.AsNoTracking().OrderBy(d => d.Hora).ToListAsync();
+
+        }
+        finally
+        {
+            EstaOcupado = false;
+
+        }
+
+
+
+    }
+
+
+    private async Task HandleSubmit(bool isValid)
+    {
+
+
+
+        if (this.Categoria is null || this.EstaOcupado || !isValid)
+        {
+            return;
+        }
+
+
+        EstaOcupado = true;
+
+        try
+        {
+            using var db = ContextFactory?.CreateDbContext();
+            await Swal.FireAsync(
+                "Actualizado Exitosamente!",
+                    "",
+                    "success"
+                );
+            db.Update(this.Categoria);
+            await db.SaveChangesAsync();
+            NavegarAOverView();
+
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+
+
+            MessageError = "La categoria fue modificada por otro usuario. Por favor recarga esta pagina para ver los ultimos cambios";
+
+        }
+        catch (Exception error)
+        {
+            MessageError = $"Ocurrrio un error {error.Message}";
+        }
+        finally
+        {
+            EstaOcupado = false;
+        }
+    }
+    private void NavegarAOverView()
+    {
+        NavigationManager.NavigateTo($"/categorias/list/{stateContainer.SistemaOverViewPage}");
+
+    }
+
+
+}

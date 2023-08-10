@@ -1,0 +1,76 @@
+﻿@page "/horario/add"
+@using LobosIguala.Data;
+
+@using Microsoft.EntityFrameworkCore;
+@using SistemaLobos.Domain.Entities;
+
+<PageTitle>NUEVO HORARIO</PageTitle>
+
+<h3>Agregar Horario</h3>
+<hr>
+@if (Horario is not null)
+{
+
+    <EditForm Model="@Horario" >
+
+
+
+
+        <div class="mbw g-3">
+            <label for="hora" class="form-label">Hora</label>
+            <InputText id="hora" class="form-control" placeholder="Ej. 17:00 PM" @bind-Value="Horario.Hora" />
+        </div>
+
+
+
+
+
+
+
+
+        <br>
+        <button class="btn btn-danger" type="submit">Guardar</button>
+
+    </EditForm>
+}
+
+@code {
+    public Horario? Horario { get; set; }
+    [Inject]
+    public IDbContextFactory<LobosIgualaDbContext>? ContextFactory { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+
+        this.Horario = new();
+        {
+
+        };
+
+
+    }
+
+
+    private async Task HandleValidSubmit()
+
+    {
+
+        if (this.Horario is not null)
+        {
+            using var Db = ContextFactory?.CreateDbContext();
+            Db.Horarios.Add(this.Horario);
+            await Db.SaveChangesAsync();
+            this.Horario = new Horario();
+        }
+
+
+
+
+
+    }
+
+
+
+
+
+
+}

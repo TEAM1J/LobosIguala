@@ -1,0 +1,131 @@
+﻿@using LobosIguala.Domain.Entities;
+@inject SweetAlertService Swal
+
+
+
+<EditForm Model="@Rol" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInValidSubmit">
+    <DataAnnotationsValidator />
+
+
+
+
+    <div class="row">
+        <div class="col-12 text-end mb-2">
+            <a class="btn btn-primary"
+               href="/roles/list"
+               style="--bs-btn-padding-y: .25rem; --bs-btn-padding-x: .5rem; --bs-btn-font-size: .75rem;">
+                Lista de roles
+            </a>
+        </div>
+    </div>
+
+    <div class="card shadow">
+        <h5 class="card-header bg-danger" style="color:#ffffff" ;><center>Formulario Roles</center></h5>
+        <div class="card-body">
+            <div class="container">
+                <div class="row">
+                    <h6>Datos</h6>
+                    <div class="col-md-6 mb-3">
+                        <label for="">Nombre</label>
+                        <InputText id="nombre" class="form-control" placeholder="Escribe el nombre del rol" @bind-Value="Rol.Nombre" />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="">Descripción </label>
+                        <InputText id="descipcion" class="form-control" placeholder="Escribe la descripción" @bind-Value="Rol.Descripcion" />
+                    </div>
+
+
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                    </div>
+                    <div class="col-md-4 mb-3">
+
+
+                        @if (this.IsEdit)
+
+                        {
+                            <button class="btn btn-primary" type="submit" disabled="@this.EstaOcupado">Actualizar</button>
+                            <button class="btn btn-danger" type="button" @onclick="HandleCancel" disabled="@this.EstaOcupado">Cancelar</button>
+
+
+
+                        }
+                        else
+                        {
+                            <button class="btn btn-primary" type="submit" href="/horarios/list" disabled="@this.EstaOcupado">Guardar</button>
+                            <a class="btn btn-danger"
+                               href="/roles/list"
+                               style="--bs-btn-padding-y: .25rem; --bs-btn-padding-x: .5rem; --bs-btn-font-size: .75rem;">
+                                Cancelar
+                            </a>
+
+
+                        }
+                    </div>
+                    <div class="col-md-4 mb-3">
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</EditForm>
+@code {
+
+    //Parameteros de entrada
+    [Parameter]
+    public Rol? Rol { get; set; }
+
+
+    [Parameter]
+    public bool EstaOcupado { get; set; }
+    [Parameter]
+    public bool IsEdit { get; set; }
+
+    //Parametros de salida
+    [Parameter]
+    public EventCallback<bool> OnSubmit { get; set; }
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+
+    private async Task HandleValidSubmit()
+    {
+        if (OnSubmit.HasDelegate)
+
+        {
+            await OnSubmit.InvokeAsync(true);
+
+
+        }
+
+    }
+    private async Task HandleInValidSubmit()
+    {
+        if (OnSubmit.HasDelegate)
+
+        {
+            await OnSubmit.InvokeAsync(false);
+
+        }
+
+    }
+    private async Task HandleCancel()
+    {
+
+
+
+
+        if (OnCancel.HasDelegate)
+        {
+            await OnCancel.InvokeAsync();
+        }
+    }
+
+
+}

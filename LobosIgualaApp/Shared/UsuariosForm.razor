@@ -1,0 +1,180 @@
+﻿@using LobosIguala.Domain.Entities;
+@inject SweetAlertService Swal
+
+
+
+<EditForm Model="@Usuario" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInValidSubmit">
+    <DataAnnotationsValidator />
+
+
+
+
+    <div class="row">
+        <div class="col-12 text-end mb-2">
+            <a class="btn btn-primary"
+               href="/usuarios/list"
+               style="--bs-btn-padding-y: .25rem; --bs-btn-padding-x: .5rem; --bs-btn-font-size: .75rem;">
+                Lista de usuarios
+            </a>
+        </div>
+    </div>
+
+    <div class="card shadow">
+        <h5 class="card-header bg-danger" style="color:#ffffff" ;><center>Formulario Usuarios</center></h5>
+        <div class="card-body">
+            <div class="container">
+                <div class="row">
+                    <h6>Datos personales</h6>
+                    <div class="col-md-6 mb-3">
+                        <label for="">Nombre</label>
+                        <InputText id="nombre" class="form-control" placeholder="Escribe el nombre" @bind-Value="Usuario.Nombre"/>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="">Apellidos</label>
+                        <InputText id="apellidos" class="form-control" placeholder="Escribe los apellidos" @bind-Value="Usuario.Apellidos" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="">RFC o Curp</label>
+                        <InputText id="rfc" class="form-control" placeholder="Escribe el RFC o CURP" @bind-Value="Usuario.RFC" />
+                    </div>
+                    <h6>Domicilio</h6>
+                    <div class="col-md-6 mb-3">
+                        <label for="">Calle y numero</label>
+                        <InputText id="calle" class="form-control" placeholder="Escribe calle y numero" @bind-Value="Usuario.Direccion" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="">Codigo postal</label>
+                        <InputText id="cp" class="form-control" placeholder="Escribe el codigo postal" @bind-Value="Usuario.CodigoPostal" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="">Colonia</label>
+                        <InputText id="col" class="form-control" placeholder="Escribe el la colonia" @bind-Value="Usuario.Colonia" />
+                    </div>
+                    <h6>Otros</h6>
+                    <div class="col-md-6 mb-3">
+                        <label for="">Correo electronico</label>
+                        <InputText id="correo" class="form-control" placeholder="Escribe el correo electronico" @bind-Value="Usuario.Correo" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="">Contraseña</label>
+                        <InputText id="password" type="password" class="form-control" placeholder="Ingresa la contraseña" @bind-Value="Usuario.Contraseña" />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="rolid">Tipo de usuario</label>
+                        <InputSelect id="rolid" class="form-select" @bind-Value="this.Usuario.RolId">
+
+                            @if (this.Roles is not null)
+                            {
+                                foreach (var rol in Roles)
+                                {
+                                    <option value="@rol.Id">
+                                        @rol.Nombre
+
+                                    </option>
+                                }
+                            }
+                        </InputSelect>
+                        <br>
+                        <Check TValue="bool" @bind-Checked="@Usuario.Status">Activo?</Check>
+
+                    </div>
+
+
+                  
+
+                    
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                    </div>
+                    <div class="col-md-4 mb-3">
+
+
+                        @if (this.IsEdit)
+
+                        {
+                            <button class="btn btn-primary" type="submit" disabled="@this.EstaOcupado">Actualizar</button>
+                            <button class="btn btn-danger" type="button" @onclick="HandleCancel" disabled="@this.EstaOcupado">Cancelar</button>
+
+
+
+                        }
+                        else
+                        {
+                            <button class="btn btn-primary" type="submit" href="/alumnos/list" disabled="@this.EstaOcupado">Guardar</button>
+                            <a class="btn btn-danger"
+                               href="/usuarios/list"
+                               style="--bs-btn-padding-y: .25rem; --bs-btn-padding-x: .5rem; --bs-btn-font-size: .75rem;">
+                                Cancelar
+                            </a>
+
+
+                        }
+                    </div>
+                    <div class="col-md-4 mb-3">
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</EditForm>
+@code {
+
+    //Parameteros de entrada
+    [Parameter]
+    public Usuario? Usuario { get; set; }
+    [Parameter]
+    public List<Rol>? Roles { get; set; }
+
+    [Parameter]
+    public bool EstaOcupado { get; set; }
+    [Parameter]
+    public bool IsEdit { get; set; }
+
+    //Parametros de salida
+    [Parameter]
+    public EventCallback<bool> OnSubmit { get; set; }
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+
+    private async Task HandleValidSubmit()
+    {
+        if (OnSubmit.HasDelegate)
+
+        {
+            await OnSubmit.InvokeAsync(true);
+
+
+        }
+
+    }
+    private async Task HandleInValidSubmit()
+    {
+        if (OnSubmit.HasDelegate)
+
+        {
+            await OnSubmit.InvokeAsync(false);
+
+        }
+
+    }
+    private async Task HandleCancel()
+    {
+
+
+
+
+        if (OnCancel.HasDelegate)
+        {
+            await OnCancel.InvokeAsync();
+        }
+    }
+
+
+}

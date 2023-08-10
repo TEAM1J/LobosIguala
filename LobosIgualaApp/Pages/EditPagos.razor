@@ -1,0 +1,139 @@
+﻿@page "/pagos/edit/{PagoId:int}"
+@using LobosIguala.Data;
+@using LobosIguala.Domain.Entities;
+@using Microsoft.EntityFrameworkCore;
+@inject SweetAlertService Swal
+
+<PageTitle>Editar Pago</PageTitle>
+<h5>Editar Pago</h5>
+
+
+@if (this.Pago is null && !EstaOcupado)
+
+{
+    <div class="alert alert-danger">
+        El Pago con el Id @this.PagoId no existe en la DataBase
+    </div>
+
+}
+else
+{
+
+
+
+    <PagosForm Pago="@this.Pago"
+             Alumnos="@this.Alumnos"
+             EstaOcupado="@this.EstaOcupado"
+             IsEdit="true"
+             OnSubmit="HandleSubmit"
+             OnCancel="NavegarAOverView" />
+
+
+
+}
+
+@if (MessageError is not null)
+{
+    <b />
+    <div class="alert alert-danger">
+        @this.MessageError
+    </div>
+
+
+}
+
+
+@code {
+    [Parameter]
+    public int PagoId { get; set; }
+    private Pago? Pago { get; set; } = new();
+    private bool EstaOcupado { get; set; }
+
+
+    public List<Alumno>? Alumnos { get; set; }
+
+
+    public bool IsEdit { get; set; }
+    [Inject]
+
+    public IDbContextFactory<LobosIgualaDbContext> ContextFactory { get; set; }
+    [Inject]
+    public NavigationManager? NavigationManager { get; set; }
+
+    [Inject]
+    public StateContainer? stateContainer { get; set; }
+    public string? MessageError { get; set; }
+
+
+    protected override async Task OnParametersSetAsync()
+    {
+        EstaOcupado = true;
+        try
+        {
+            using var db = ContextFactory.CreateDbContext();
+            this.Pago = await db.Pagos.AsNoTracking()
+            .FirstOrDefaultAsync(emp => emp.Id.Equals(this.PagoId));
+            this.Alumnos = await db.Alumnos.AsNoTracking().OrderBy(d => d.Nombre).ToListAsync();
+
+        }
+        finally
+        {
+            EstaOcupado = false;
+
+        }
+
+
+
+    }
+
+
+    private async Task HandleSubmit(bool isValid)
+    {
+
+
+
+        if (this.Pago is null || this.EstaOcupado || !isValid)
+        {
+            return;
+        }
+
+
+        EstaOcupado = true;
+
+        try
+        {
+            using var db = ContextFactory?.CreateDbContext();
+            await Swal.FireAsync(
+                "Actualizado Exitosamente!",
+                    "",
+                    "success"
+                );
+            db.Update(this.Pago);
+            await db.SaveChangesAsync();
+            NavegarAOverView();
+
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+
+
+            MessageError = "El pago fue modificado por otro usuario. Por favor recarga esta pagina para ver los ultimos cambios";
+
+        }
+        catch (Exception error)
+        {
+            MessageError = $"Ocurrrio un error {error.Message}";
+        }
+        finally
+        {
+            EstaOcupado = false;
+        }
+    }
+    private void NavegarAOverView()
+    {
+        NavigationManager.NavigateTo($"/pagos/list/{stateContainer.SistemaOverViewPage}");
+
+    }
+
+
+}

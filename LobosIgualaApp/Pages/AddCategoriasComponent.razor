@@ -1,0 +1,182 @@
+﻿@page "/categorias/add"
+@using LobosIguala.Data;
+@using LobosIguala.Domain.Entities;
+@using Microsoft.EntityFrameworkCore;
+@inject SweetAlertService Swal
+
+<PageTitle>Nueva Categoria</PageTitle>
+
+
+
+@if (Categoria is not null)
+{
+    <CategoriasForm Categoria="@this.Categoria"
+             Entrenadores="@this.Entrenadores"
+                          Horarios="@this.Horarios"
+
+             EstaOcupado="@this.EstaOcupado"
+             OnSubmit="@HandleSubmit"
+             OnCancel="NavegarAOverView" />
+
+
+    @if (this.MensajeExitoso is not null)
+
+    {
+        <br />
+        <div class="alert alert-success">
+            @this.MensajeExitoso
+
+        </div>
+
+
+    }
+    @if (this.MensajeError is not null)
+
+    {
+        <br />
+        <div class="alert alert-danger">
+            @this.MensajeError
+
+        </div>
+
+
+    }
+
+}
+
+
+
+
+@code {
+    public Categoria? Categoria { get; set; }
+    public List<Horario> Horarios { get; set; }
+    public List<Entrenador> Entrenadores { get; set; }
+
+
+    private string? MensajeExitoso { get; set; }
+    private string? MensajeError { get; set; }
+    private bool EstaOcupado { get; set; }
+
+    [Inject]
+    public NavigationManager? NavigationManager { get; set; }
+
+    [Inject]
+    public StateContainer? stateContainer { get; set; }
+
+
+
+    [Inject]
+    public IDbContextFactory<LobosIgualaDbContext>? ContextFactory { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var Db = ContextFactory.CreateDbContext();
+
+        this.Entrenadores = await Db.Entrenadores
+        .OrderBy(d => d.Nombre)
+        .ToListAsync();
+
+       
+        this.Horarios = await Db.Horarios
+       .OrderBy(d => d.Hora)
+       .ToListAsync();
+
+        this.Categoria = new()
+            {
+                EntrenadorId = Entrenadores.First().Id,
+
+                HorarioId = Horarios.First().Id
+            };
+
+
+
+
+
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (this.EstaOcupado)
+        {
+            return;
+
+        }
+
+        this.EstaOcupado = true;
+        try
+        {
+
+
+
+
+            if (this.Categoria is not null)
+
+
+
+
+            {
+
+                using var Db = ContextFactory?.CreateDbContext();
+                await Swal.FireAsync(
+               "Guardado Exitosamente!",
+                   "",
+                   "success"
+               );
+                Db.Categorias.Add(this.Categoria);
+                await Db.SaveChangesAsync();
+                NavegarAOverView();
+
+                //MensajeExitoso = $"Se guardo correctamente!";
+                MensajeError = null;
+                this.Categoria = new Categoria()
+                    {
+                        EntrenadorId = this.Categoria.EntrenadorId,
+                        HorarioId = this.Categoria.HorarioId
+
+
+
+                    };
+
+
+            }
+        }
+        catch (Exception ex)
+        {
+            MensajeError = $"Error al intentar guardar la informacion {ex.Message}";
+            MensajeExitoso = null;
+        }
+        finally
+        {
+            this.EstaOcupado = false;
+        }
+
+    }
+
+    private void HandleInValidSubmit()
+    {
+        this.MensajeError = null;
+        this.MensajeExitoso = null;
+    }
+    private async Task HandleSubmit(bool Isvalid)
+    {
+        if (Isvalid)
+        {
+            await HandleValidSubmit();
+
+        }
+        else
+        {
+            HandleInValidSubmit();
+        }
+
+
+    }
+    private void NavegarAOverView()
+    {
+        NavigationManager.NavigateTo($"/categorias/list/{stateContainer.SistemaOverViewPage}");
+
+    }
+
+
+
+}

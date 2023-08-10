@@ -1,0 +1,136 @@
+﻿@page "/roles/edit/{RolId:int}"
+@using LobosIguala.Data;
+@using LobosIguala.Domain.Entities;
+@using Microsoft.EntityFrameworkCore;
+@inject SweetAlertService Swal
+
+<PageTitle>Editar Rol</PageTitle>
+<h5>Editar Rol</h5>
+
+
+@if (this.Rol is null && !EstaOcupado)
+
+{
+    <div class="alert alert-danger">
+        El Rol con el Id @this.RolId no existe en la DataBase
+    </div>
+
+}
+else
+{
+
+
+
+    <RolesForm Rol="@this.Rol"
+              EstaOcupado="@this.EstaOcupado"
+              IsEdit="true"
+              OnSubmit="HandleSubmit"
+              OnCancel="NavegarAOverView" />
+
+
+
+}
+
+@if (MessageError is not null)
+{
+    <b />
+    <div class="alert alert-danger">
+        @this.MessageError
+    </div>
+
+
+}
+
+
+@code {
+    [Parameter]
+    public int RolId { get; set; }
+    private Rol? Rol { get; set; } = new();
+    private bool EstaOcupado { get; set; }
+
+
+
+    public bool IsEdit { get; set; }
+    [Inject]
+
+    public IDbContextFactory<LobosIgualaDbContext> ContextFactory { get; set; }
+    [Inject]
+    public NavigationManager? NavigationManager { get; set; }
+
+    [Inject]
+    public StateContainer? stateContainer { get; set; }
+    public string? MessageError { get; set; }
+
+
+    protected override async Task OnParametersSetAsync()
+    {
+        EstaOcupado = true;
+        try
+        {
+            using var db = ContextFactory.CreateDbContext();
+            this.Rol = await db.Roles.AsNoTracking()
+            .FirstOrDefaultAsync(emp => emp.Id.Equals(this.RolId));
+
+
+        }
+        finally
+        {
+            EstaOcupado = false;
+
+        }
+
+
+
+    }
+
+
+    private async Task HandleSubmit(bool isValid)
+    {
+
+
+
+        if (this.Rol is null || this.EstaOcupado || !isValid)
+        {
+            return;
+        }
+
+
+        EstaOcupado = true;
+
+        try
+        {
+            using var db = ContextFactory?.CreateDbContext();
+            await Swal.FireAsync(
+                "Actualizado Exitosamente!",
+                    "",
+                    "success"
+                );
+            db.Update(this.Rol);
+            await db.SaveChangesAsync();
+            NavegarAOverView();
+
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+
+
+            MessageError = "El rol fue modificado por otro usuario. Por favor recarga esta pagina para ver los ultimos cambios";
+
+        }
+        catch (Exception error)
+        {
+            MessageError = $"Ocurrrio un error {error.Message}";
+        }
+        finally
+        {
+            EstaOcupado = false;
+        }
+    }
+    private void NavegarAOverView()
+    {
+        NavigationManager.NavigateTo($"/roles/list/{stateContainer.SistemaOverViewPage}");
+
+    }
+
+
+}

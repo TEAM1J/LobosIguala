@@ -1,0 +1,136 @@
+﻿@page "/horarios/edit/{HorarioId:int}"
+@using LobosIguala.Data;
+@using LobosIguala.Domain.Entities;
+@using Microsoft.EntityFrameworkCore;
+@inject SweetAlertService Swal
+
+<PageTitle>Editar Horario</PageTitle>
+<h5>Editar Categoria</h5>
+
+
+@if (this.Horario is null && !EstaOcupado)
+
+{
+    <div class="alert alert-danger">
+        El Horario con el Id @this.HorarioId no existe en la DataBase
+    </div>
+
+}
+else
+{
+
+
+
+    <HorariosForm Horario="@this.Horario"
+                EstaOcupado="@this.EstaOcupado"
+                IsEdit="true"
+                OnSubmit="HandleSubmit"
+                OnCancel="NavegarAOverView" />
+
+
+
+}
+
+@if (MessageError is not null)
+{
+    <b />
+    <div class="alert alert-danger">
+        @this.MessageError
+    </div>
+
+
+}
+
+
+@code {
+    [Parameter]
+    public int HorarioId { get; set; }
+    private Horario? Horario { get; set; } = new();
+    private bool EstaOcupado { get; set; }
+
+
+
+    public bool IsEdit { get; set; }
+    [Inject]
+
+    public IDbContextFactory<LobosIgualaDbContext> ContextFactory { get; set; }
+    [Inject]
+    public NavigationManager? NavigationManager { get; set; }
+
+    [Inject]
+    public StateContainer? stateContainer { get; set; }
+    public string? MessageError { get; set; }
+
+
+    protected override async Task OnParametersSetAsync()
+    {
+        EstaOcupado = true;
+        try
+        {
+            using var db = ContextFactory.CreateDbContext();
+            this.Horario = await db.Horarios.AsNoTracking()
+            .FirstOrDefaultAsync(emp => emp.Id.Equals(this.HorarioId));
+           
+
+        }
+        finally
+        {
+            EstaOcupado = false;
+
+        }
+
+
+
+    }
+
+
+    private async Task HandleSubmit(bool isValid)
+    {
+
+
+
+        if (this.Horario is null || this.EstaOcupado || !isValid)
+        {
+            return;
+        }
+
+
+        EstaOcupado = true;
+
+        try
+        {
+            using var db = ContextFactory?.CreateDbContext();
+            await Swal.FireAsync(
+                "Actualizado Exitosamente!",
+                    "",
+                    "success"
+                );
+            db.Update(this.Horario);
+            await db.SaveChangesAsync();
+            NavegarAOverView();
+
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+
+
+            MessageError = "El horario fue modificado por otro usuario. Por favor recarga esta pagina para ver los ultimos cambios";
+
+        }
+        catch (Exception error)
+        {
+            MessageError = $"Ocurrrio un error {error.Message}";
+        }
+        finally
+        {
+            EstaOcupado = false;
+        }
+    }
+    private void NavegarAOverView()
+    {
+        NavigationManager.NavigateTo($"/horarios/list/{stateContainer.SistemaOverViewPage}");
+
+    }
+
+
+}

@@ -1,0 +1,191 @@
+﻿@using LobosIguala.Domain.Entities;
+@inject SweetAlertService Swal
+
+
+
+<EditForm Model="@Alumno" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInValidSubmit">
+    <DataAnnotationsValidator />
+
+
+
+
+    <div class="row">
+        <div class="col-12 text-end mb-2">
+            <a class="btn btn-primary"
+               href="/alumnos/list"
+               style="--bs-btn-padding-y: .25rem; --bs-btn-padding-x: .5rem; --bs-btn-font-size: .75rem;">
+                Lista de alumnos
+            </a>
+        </div>
+    </div>
+
+    <div class="card shadow">
+        <h5 class="card-header bg-danger" style="color:#ffffff" ;><center>Formulario Alumnos</center></h5>
+        <div class="card-body">
+            <div class="container">
+                <div class="row">
+                    <h6>Datos personales</h6>
+                    <div class="col-md-6 mb-3">
+                        <label for="">Nombre</label>
+                        <InputText id="nombre" class="form-control" placeholder="Escribe el nombre" @bind-Value="Alumno.Nombre" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="">Apellidos</label>
+                        <InputText id="apellidos" class="form-control" placeholder="Escribe los apellidos" @bind-Value="Alumno.Apellidos" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="">CURP</label>
+                        <InputText id="rfc" class="form-control" placeholder="Escribe el CURP" @bind-Value="Alumno.Curp" />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label for="nacimiento">Fecha de nacimiento</label>
+                        <InputDate id="nacimiento" class="form-control" name="trip-start"
+                                   min="1999-01-01" max="2040-12-31" @bind-Value="Alumno.FechaDeNacimiento" />
+                    </div>
+                    <h6>Padre o Tutor</h6>
+                    <div class="col-md-6 mb-3">
+                        <label for="">Padre o tutor</label>
+                        <InputText id="tutor" class="form-control" placeholder="Escribe el nombre" @bind-Value="Alumno.NombreDelTutor" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="">Apellidos</label>
+                        <InputText id="apellidos" class="form-control" placeholder="Escribe los apellidos" @bind-Value="Alumno.ApellidosDelTutor" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="">Parentesco</label>
+                        <InputText id="parentesco" class="form-control" placeholder="Escribe el parentesco" @bind-Value="Alumno.Parentesco" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="">Telefono</label>
+                        <InputText id="telefono" class="form-control" placeholder="0000000000" @bind-Value="Alumno.Telefono" />
+                    </div>
+                  
+
+                    <h6>Domicilio</h6>
+                    <div class="col-md-6 mb-3">
+                        <label for="">Dirección</label>
+                        <InputText id="direccion" class="form-control" placeholder="Ej. Calle y numero" @bind-Value="Alumno.Direccion" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="">Codigo Postal</label>
+                        <InputText id="cp" class="form-control" placeholder="Ej. 40000" @bind-Value="Alumno.CodigoPostal" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="">Colonia</label>
+                        <InputText id="colonia" class="form-control" placeholder="Escribe la colonia" @bind-Value="Alumno.Colonia" />
+                    </div>
+                   
+                
+                    <h6>Otros</h6>
+                    <div class="mb-3">
+                        <label for="categoriaid">Categoria</label>
+                        <InputSelect id="categoriaid" placeHolder="Selecciona"class="form-select" @bind-Value="this.Alumno.CategoriaId">
+
+                            @if (this.Categorias is not null)
+                            {
+                                foreach (var categoria in Categorias)
+                                {
+                                    <option value="@categoria.Id">
+                                        @categoria.Nombre
+
+                                    </option>
+                                }
+                            }
+                        </InputSelect>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                    </div>
+                    <div class="col-md-4 mb-3">
+
+
+                        @if (this.IsEdit)
+
+                        {
+                            <button class="btn btn-primary" type="submit" disabled="@this.EstaOcupado">Actualizar</button>
+                            <button class="btn btn-danger" type="button" @onclick="HandleCancel" disabled="@this.EstaOcupado">Cancelar</button>
+
+
+
+                        }
+                        else
+                        {
+                            <button class="btn btn-primary" type="submit" href="/alumnos/list" disabled="@this.EstaOcupado">Guardar</button>
+                            <a class="btn btn-danger"
+                               href="/alumnos/list"
+                               style="--bs-btn-padding-y: .25rem; --bs-btn-padding-x: .5rem; --bs-btn-font-size: .75rem;">
+                                Cancelar
+                            </a>
+
+
+                        }
+                    </div>
+                    <div class="col-md-4 mb-3">
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+    </EditForm>
+@code {
+
+    //Parameteros de entrada
+    [Parameter]
+    public Alumno? Alumno { get; set; }
+    [Parameter]
+    public List<Categoria>? Categorias { get; set; }
+   
+    [Parameter]
+    public bool EstaOcupado { get; set; }
+    [Parameter]
+    public bool IsEdit { get; set; }
+
+    //Parametros de salida
+    [Parameter]
+    public EventCallback<bool> OnSubmit { get; set; }
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+
+    private async Task HandleValidSubmit()
+    {
+        if (OnSubmit.HasDelegate)
+
+        {
+            await OnSubmit.InvokeAsync(true);
+
+
+        }
+
+    }
+    private async Task HandleInValidSubmit()
+    {
+        if (OnSubmit.HasDelegate)
+
+        {
+            await OnSubmit.InvokeAsync(false);
+
+        }
+
+    }
+    private async Task HandleCancel()
+    {
+       
+        
+
+
+        if (OnCancel.HasDelegate)
+        {
+            await OnCancel.InvokeAsync();
+        }
+    }
+
+
+}

@@ -1,0 +1,178 @@
+﻿@page "/pagos/add"
+@using LobosIguala.Data;
+@using LobosIguala.Domain.Entities;
+@using Microsoft.EntityFrameworkCore;
+@inject SweetAlertService Swal
+
+@inject IJSRuntime JS
+
+
+<PageTitle>Nuevo Pago</PageTitle>
+
+
+
+@if (Pago is not null)
+{
+    <PagosForm Pago="@this.Pago"
+             Alumnos="@this.Alumnos"
+             EstaOcupado="@this.EstaOcupado"
+             OnSubmit="@HandleSubmit"
+             OnCancel="NavegarAOverView" />
+
+
+    @if (this.MensajeExitoso is not null)
+
+    {
+        <br />
+        <div class="alert alert-success">
+            @this.MensajeExitoso
+
+        </div>
+
+
+    }
+    @if (this.MensajeError is not null)
+
+    {
+        <br />
+        <div class="alert alert-danger">
+            @this.MensajeError
+
+        </div>
+
+
+    }
+
+}
+
+
+
+
+
+@code {
+    public Pago? Pago { get; set; }
+    public List<Alumno> Alumnos { get; set; }
+
+
+    private string? MensajeExitoso { get; set; }
+    private string? MensajeError { get; set; }
+    private bool EstaOcupado { get; set; }
+
+    [Inject]
+    public NavigationManager? NavigationManager { get; set; }
+
+    [Inject]
+    public StateContainer? stateContainer { get; set; }
+
+
+
+    [Inject]
+    public IDbContextFactory<LobosIgualaDbContext>? ContextFactory { get; set; }
+
+   
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var Db = ContextFactory.CreateDbContext();
+
+        this.Alumnos = await Db.Alumnos
+        .OrderBy(d => d.Nombre)
+        .ToListAsync();
+
+        this.Pago = new()
+            {
+                AlumnoId = Alumnos.First().Id,
+                 FechaDePago= DateTime.Today
+            };
+
+
+
+
+
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (this.EstaOcupado)
+        {
+            return;
+
+        }
+
+        this.EstaOcupado = true;
+        try
+        {
+
+
+
+
+            if (this.Pago is not null)
+
+
+
+
+            {
+
+                using var Db = ContextFactory?.CreateDbContext();
+                await Swal.FireAsync(
+               "Guardado Exitosamente!",
+                   "",
+                   "success"
+               );
+                Db.Pagos.Add(this.Pago);
+                await Db.SaveChangesAsync();
+                NavegarAOverView();
+
+                //MensajeExitoso = $"Se guardo correctamente!";
+                MensajeError = null;
+                this.Pago = new Pago()
+                    {
+                        AlumnoId = this.Pago.AlumnoId,
+
+
+                    };
+
+
+            }
+        }
+        catch (Exception ex)
+        {
+            MensajeError = $"Error al intentar guardar la informacion {ex.Message}";
+            MensajeExitoso = null;
+        }
+        finally
+        {
+            this.EstaOcupado = false;
+        }
+
+    }
+
+    private void HandleInValidSubmit()
+    {
+        this.MensajeError = null;
+        this.MensajeExitoso = null;
+    }
+    private async Task HandleSubmit(bool Isvalid)
+    {
+        if (Isvalid)
+        {
+            await HandleValidSubmit();
+
+        }
+        else
+        {
+            HandleInValidSubmit();
+        }
+
+
+    }
+    private void NavegarAOverView()
+    {
+        NavigationManager.NavigateTo($"/pagos/list/{stateContainer.SistemaOverViewPage}");
+
+    }
+
+
+
+}

@@ -1,0 +1,139 @@
+﻿@page "/usuarios/edit/{UsuarioId:int}"
+@using LobosIguala.Data;
+@using LobosIguala.Domain.Entities;
+@using Microsoft.EntityFrameworkCore;
+@inject SweetAlertService Swal
+
+<PageTitle>Editar Usuario</PageTitle>
+<h5>Editar Usuario</h5>
+
+
+@if (this.Usuario is null && !EstaOcupado)
+
+{
+    <div class="alert alert-danger">
+        El Usuario con el Id @this.UsuarioId no existe en la DataBase
+    </div>
+
+}
+else
+{
+
+
+
+    <UsuariosForm Usuario="@this.Usuario"
+             Roles="@this.Roles"
+             EstaOcupado="@this.EstaOcupado"
+             IsEdit="true"
+             OnSubmit="HandleSubmit"
+             OnCancel="NavegarAOverView" />
+
+
+
+}
+
+@if (MessageError is not null)
+{
+    <b />
+    <div class="alert alert-danger">
+        @this.MessageError
+    </div>
+
+
+}
+
+
+@code {
+    [Parameter]
+    public int UsuarioId { get; set; }
+    private Usuario? Usuario { get; set; } = new();
+    private bool EstaOcupado { get; set; }
+
+
+    public List<Rol>? Roles { get; set; }
+
+
+    public bool IsEdit { get; set; }
+    [Inject]
+
+    public IDbContextFactory<LobosIgualaDbContext> ContextFactory { get; set; }
+    [Inject]
+    public NavigationManager? NavigationManager { get; set; }
+
+    [Inject]
+    public StateContainer? stateContainer { get; set; }
+    public string? MessageError { get; set; }
+
+
+    protected override async Task OnParametersSetAsync()
+    {
+        EstaOcupado = true;
+        try
+        {
+            using var db = ContextFactory.CreateDbContext();
+            this.Usuario = await db.Usuarios.AsNoTracking()
+            .FirstOrDefaultAsync(emp => emp.Id.Equals(this.UsuarioId));
+            this.Roles = await db.Roles.AsNoTracking().OrderBy(d => d.Nombre).ToListAsync();
+
+        }
+        finally
+        {
+            EstaOcupado = false;
+
+        }
+
+
+
+    }
+
+
+    private async Task HandleSubmit(bool isValid)
+    {
+
+
+
+        if (this.Usuario is null || this.EstaOcupado || !isValid)
+        {
+            return;
+        }
+
+
+        EstaOcupado = true;
+
+        try
+        {
+            using var db = ContextFactory?.CreateDbContext();
+            await Swal.FireAsync(
+                "Actualizado Exitosamente!",
+                    "",
+                    "success"
+                );
+            db.Update(this.Usuario);
+            await db.SaveChangesAsync();
+            NavegarAOverView();
+
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+
+
+            MessageError = "El usuario fue modificado por otro usuario. Por favor recarga esta pagina para ver los ultimos cambios";
+
+        }
+        catch (Exception error)
+        {
+            MessageError = $"Ocurrrio un error {error.Message}";
+        }
+        finally
+        {
+            EstaOcupado = false;
+        }
+    }
+    private void NavegarAOverView()
+    {
+        NavigationManager.NavigateTo($"/usuarios/list/{stateContainer.SistemaOverViewPage}");
+
+    }
+
+
+}
