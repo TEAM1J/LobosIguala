@@ -28,37 +28,45 @@
                     <div class="col-md-6 mb-3">
                         <label for="">Nombre</label>
                         <InputText id="nombre" class="form-control" placeholder="Escribe el nombre" @bind-Value="Alumno.Nombre" />
+                          <ValidationMessage For="()=>Alumno.Nombre"/>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="">Apellidos</label>
                         <InputText id="apellidos" class="form-control" placeholder="Escribe los apellidos" @bind-Value="Alumno.Apellidos" />
+                        <ValidationMessage For="()=>Alumno.Apellidos"/>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="">CURP</label>
                         <InputText id="rfc" class="form-control" placeholder="Escribe el CURP" @bind-Value="Alumno.Curp" />
+                        <ValidationMessage For="()=>Alumno.Curp"/>
                     </div>
 
                     <div class="col-md-6 mb-3">
                         <label for="nacimiento">Fecha de nacimiento</label>
                         <InputDate id="nacimiento" class="form-control" name="trip-start"
                                    min="1999-01-01" max="2040-12-31" @bind-Value="Alumno.FechaDeNacimiento" />
+                        <ValidationMessage For="()=>Alumno.FechaDeNacimiento" />
                     </div>
                     <h6>Padre o Tutor</h6>
                     <div class="col-md-6 mb-3">
                         <label for="">Padre o tutor</label>
                         <InputText id="tutor" class="form-control" placeholder="Escribe el nombre" @bind-Value="Alumno.NombreDelTutor" />
+                        <ValidationMessage For="()=>Alumno.NombreDelTutor" />
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="">Apellidos</label>
                         <InputText id="apellidos" class="form-control" placeholder="Escribe los apellidos" @bind-Value="Alumno.ApellidosDelTutor" />
+                        <ValidationMessage For="()=>Alumno.ApellidosDelTutor" />
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="">Parentesco</label>
                         <InputText id="parentesco" class="form-control" placeholder="Escribe el parentesco" @bind-Value="Alumno.Parentesco" />
+                        <ValidationMessage For="()=>Alumno.Parentesco" />
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="">Telefono</label>
                         <InputText id="telefono" class="form-control" placeholder="0000000000" @bind-Value="Alumno.Telefono" />
+                        <ValidationMessage For="()=>Alumno.Telefono" />
                     </div>
                   
 
@@ -66,15 +74,18 @@
                     <div class="col-md-6 mb-3">
                         <label for="">Dirección</label>
                         <InputText id="direccion" class="form-control" placeholder="Ej. Calle y numero" @bind-Value="Alumno.Direccion" />
+                        <ValidationMessage For="()=>Alumno.Direccion" />
                     </div>
                     <div class="col-md-6 mb-3">
                         <label for="">Codigo Postal</label>
                         <InputText id="cp" class="form-control" placeholder="Ej. 40000" @bind-Value="Alumno.CodigoPostal" />
+                        <ValidationMessage For="()=>Alumno.CodigoPostal" />
                     </div>
 
                     <div class="mb-3">
                         <label for="">Colonia</label>
                         <InputText id="colonia" class="form-control" placeholder="Escribe la colonia" @bind-Value="Alumno.Colonia" />
+                        <ValidationMessage For="()=>Alumno.Colonia" />
                     </div>
                    
                 
