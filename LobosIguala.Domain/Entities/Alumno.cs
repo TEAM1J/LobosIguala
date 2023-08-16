@@ -34,9 +34,6 @@ namespace LobosIguala.Domain.Entities
 
         [Required(ErrorMessage = "La categoria es obligatoria")]
 
-
-        [Required(ErrorMessage = "La categoria es obligatoria")]
-
         public Categoria Categoria { get; set; }   //Propiedad de navegacion
         public int CategoriaId { get; set; } //FK
 
