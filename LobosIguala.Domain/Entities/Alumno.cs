@@ -32,7 +32,6 @@ namespace LobosIguala.Domain.Entities
         public DateTime FechaDeNacimiento { get; set; }
 
 
-        [Required(ErrorMessage = "La categoria es obligatoria")]
 
         public Categoria Categoria { get; set; }   //Propiedad de navegacion
         public int CategoriaId { get; set; } //FK
