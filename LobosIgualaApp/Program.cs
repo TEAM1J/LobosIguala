@@ -5,6 +5,8 @@ using Blazorise.Icons.Material;
 using Blazorise.Material;
 using CurrieTechnologies.Razor.SweetAlert2;
 using LobosIguala.Data;
+using LobosIgualaApp.Interface;
+using LobosIgualaApp.Servicios;
 using LobosIgualaApp.Shared;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
@@ -20,6 +22,7 @@ builder.Services.AddServerSideBlazor();
 //builder.Services.AddSingleton<WeatherForecastService>();
 builder.Services.AddDbContextFactory<LobosIgualaDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("AdminLobosContext")));
+builder.Services.AddScoped<IPagoServicios, PagoServicio>();
 //builder.Services.AddScoped<StateContainer>();
 builder.Services.AddScoped<StateContainer>();
 builder.Services.AddSweetAlert2();
