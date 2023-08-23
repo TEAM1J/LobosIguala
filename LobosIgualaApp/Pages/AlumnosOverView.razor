@@ -2,6 +2,8 @@
 @page "/alumnos/list/{PaginaActual:int?}"
 @using LobosIguala.Data;
 @using LobosIguala.Domain.Entities;
+@using LobosIgualaApp.Interface;
+@using LobosIgualaApp.Servicios;
 @using LobosIgualaApp.Shared;
 @using Microsoft.EntityFrameworkCore;
 @inject SweetAlertService Swal
@@ -108,6 +110,9 @@ else
                                     <td>@alumno.NombreDelTutor @alumno.ApellidosDelTutor</td>
                                     <td>@alumno.Telefono</td>
                                     <td class="btn-group-sm">
+                                        <button class="btn btn-outline-danger" @onclick="()=> MostrarPagos(alumno.Id)">Pagos</button>
+
+
                                         <a href="/alumnos/edit/@alumno.Id" class="btn btn-outline-primary">Editar</a>
                                         <button class="btn btn-outline-danger" @onclick="() => HandleDelete(alumno)">Eliminar</button>
                                     </td>
@@ -127,12 +132,70 @@ else
    
 }
 
+<div class="modal" style="display: @(showPagosModal ? "block" : "none")">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Pagos del Alumno</h5>
+               @* <button type="button" class="close" @onclick="CerrarModal">
+                    <span>&times;</span>
+                </button>*@
+            </div>
+            <div class="modal-body">
+                <ul>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Folio</th>
+                                <th>Alumno</th>
+                                <th>Concepto</th>
+                                <th>Importe</th>
+                                <th>Fecha de pago</th>
+
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var pago in Pagos)
+                            {
+                                <tr>
+                                    <td>@pago.Id</td>
+                                    <td>@pago.Alumno.Nombre @pago.Alumno.Apellidos</td>
+                                    <td>@pago.Concepto</td>
+                                    <td>@pago.Importe</td>
+                                    <td>@pago.FechaDePago</td>
+
+
+
+                                </tr>
+
+                            }
+
+                        </tbody>
+                        
+                    </table>
+                    
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline-secondary" @onclick="CerrarModal">
+                    Cerrar
+
+                </button>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
 
 
 
 @code {
 
     public List<Alumno>? Alumnos { get; set; }
+    public List<Pago> Pagos { get; set; } = new();
     [Parameter]
     public int? PaginaActual { get; set; }
 
@@ -143,7 +206,39 @@ else
     [Inject]
     public StateContainer? stateContainer { get; set; }
     private const int itemporpagina = 4;
+    private bool showPagosModal = false;
+    private int alumnoSeleccionado = -1;
+    [Inject]
+    public IPagoServicios? PagoServicio { get; set; }
+
+
+
+
     public int TotalPaginas { get; set; }
+
+    private void CerrarModal()
+    {
+        showPagosModal = false;
+        alumnoSeleccionado = -1;
+        StateHasChanged();
+    }
+
+    private async Task MostrarPagos(int alumnoId)
+    {
+        try
+        {
+            Pagos = await PagoServicio.ObtenerPagosPorAlumno(alumnoId);
+            alumnoSeleccionado = alumnoId;
+            showPagosModal = true;
+        }
+        catch (Exception ex)
+        {
+
+            Console.WriteLine($"Error al obtener pagos: {ex.Message}");
+        }
+        
+
+    }
 
 
 
