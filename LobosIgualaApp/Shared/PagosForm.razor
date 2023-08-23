@@ -32,20 +32,25 @@
                     <h6>Datos personales</h6>
 
                     <div class="col-md-6 mb-3">
-                        <label for="nombreid">Alumno</label>
-                        <InputSelect id="alumnoid"  class="form-select" @bind-Value="this.Pago.AlumnoId">
+                        <div class="form-group">
+                            <InputText @bind-Value="BuscarAlumno" placeholder="Buscar por alumno" class="form-control" @oninput="BuscarAlumnonN" />
+                            <div class="card">
+                                <div class="card-body">
+                                    <ul class="search-results">
+                                        @foreach (var alumno in FiltradoAlumnos)
+                                        {
+                                            <div class="compact-card" @onclick="() => SeleccionarAlumno(alumno)">
+                                                <p class="card-text">@($"{alumno.Nombre} {alumno.Apellidos}")</p>
+                                            </div>
+                                        }            
+                                    </ul>
+                                </div>
 
-                            @if (this.Alumnos is not null)
-                            {
-                                foreach (var alumno in Alumnos)
-                                {
-                                    <option value="@alumno.Id">
-                                        @alumno.Nombre @alumno.Apellidos
-
-                                    </option>
-                                }
-                            }
-                        </InputSelect>
+                            </div>
+                        </div>
+                        
+                        
+                        
                     </div>
 
 
@@ -110,6 +115,12 @@
     </div>
 </EditForm>
 @code {
+    private string BuscarAlumno = "";
+
+    private List<Alumno> FiltradoAlumnos = new();
+
+    private int minimo2caracteres = 2;
+
 
     //Parameteros de entrada
     [Parameter]
@@ -162,5 +173,26 @@
         }
     }
 
+    private void BuscarAlumnonN(ChangeEventArgs e)
+    {
+        BuscarAlumno = e.Value.ToString();
+        if (BuscarAlumno.Length >= minimo2caracteres)
+        {
+            FiltradoAlumnos = Alumnos
+           .Where(alumno =>$"{alumno.Nombre} {alumno.Apellidos}".ToLower().Contains(BuscarAlumno.ToLower()))
+           .ToList();
+        }
+        else
+        {
+            FiltradoAlumnos.Clear();
+        }
+    }
+
+    private void SeleccionarAlumno(Alumno alumno)
+    {
+        Pago.AlumnoId = alumno.Id;
+        BuscarAlumno = alumno.Nombre;
+        FiltradoAlumnos.Clear();
+    }
 
 }
