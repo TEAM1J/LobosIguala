@@ -1,0 +1,120 @@
+﻿@page "/pagos/day"
+@using LobosIguala.Data;
+@using LobosIguala.Domain.Entities;
+@using Microsoft.EntityFrameworkCore;
+
+<PageTitle>Pagos</PageTitle>
+<h5>Pagos del dia</h5>
+<div class="row">
+    <div class="col-12 text-start mb-2">
+        <a class="btn btn-primary"
+           href="/pagos/add"
+           style="--bs-btn-padding-y: .25rem; --bs-btn-padding-x: .5rem; --bs-btn-font-size: .75rem;">
+            Agregar Nuevo
+        </a>
+    </div>
+</div>
+
+
+@if (Pagos == null)
+{
+    <div>
+        Cargando informacion
+    </div>
+}
+else
+{
+
+
+
+
+
+
+    <div class="card shadow">
+        <div class="card-body">
+            @* <div class="row">
+        <div class="col-12 text-end mb-2">
+        <a class="btn btn-secondary"
+        href="/alumnos/add"
+        style="--bs-btn-padding-y: .25rem; --bs-btn-padding-x: .5rem; --bs-btn-font-size: .75rem;">
+        Agregar Alumno
+        </a>
+        </div>
+
+        </div>*@
+
+            <div class="row">
+                <div class="col-12">
+                    <table class="table align-middle mb-0 bg-white">
+
+
+                        <thead class="bg-danger" style="color:#ffffff" ;>
+
+                            <tr>
+                                <th>Alumno</th>
+                                <th>Concepto de pago</th>
+                                <th>Importe</th>
+                                <th>Fecha de pago</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+
+
+
+                        <tbody>
+                            @foreach (var pago in Pagos)
+                            {
+                                <tr>
+                                    <td>@pago.Alumno?.Nombre @pago.Alumno?.Apellidos</td>
+                                    <td>@pago.Concepto</td>
+                                    <td>@pago.Importe</td>
+                                    <td>@pago.FechaDePago</td>
+                                    <td class="btn-group-sm">
+                                        <a href="" class="btn btn-outline-primary">Imprimir</a>
+
+                                    </td>
+
+
+                                </tr>
+
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+
+    </div>
+
+}
+
+
+
+
+
+@code {
+
+
+    public List<Pago>? Pagos { get; set; }
+    [Inject]
+    public IDbContextFactory<LobosIgualaDbContext>? ContextFactory { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        using var Db = ContextFactory?.CreateDbContext();
+
+
+
+        this.Pagos = await Db.Pagos
+    .Where(p => p.FechaDePago.Date == DateTime.Now.Date) // Filtrar por la fecha actual
+    .Include(em => em.Alumno)
+    .OrderBy(em => em.FechaDePago)
+
+    .ToListAsync();
+    }
+
+
+}
+
